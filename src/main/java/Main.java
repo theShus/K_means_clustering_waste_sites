@@ -1,10 +1,7 @@
-import data.DataLoader;
 import data.WWSite;
-import scene.Scene;
-import scene.Window;
+import scene.WindowFrame;
 
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.*;
 import java.util.List;
 
 import static data.DataLoader.readSitesFromFile;
@@ -23,8 +20,8 @@ public class Main {
 //            System.out.println(site.toString());
 //        }
 
-        Window window = new Window();
-
+        System.out.println("Starting map");
+        SwingUtilities.invokeLater(WindowFrame::new);
 
     }
 
