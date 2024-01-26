@@ -1,3 +1,5 @@
+package data;
+
 public class WWSite {
 
     private String name;
@@ -46,7 +48,7 @@ public class WWSite {
 
     @Override
     public String toString() {
-        return "WWSite{" +
+        return "data.WWSite{" +
                 "name='" + name + '\'' +
                 ", capacity=" + capacity +
                 ", latitude=" + latitude +

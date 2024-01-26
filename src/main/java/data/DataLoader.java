@@ -1,3 +1,5 @@
+package data;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -9,20 +11,9 @@ import java.util.List;
 
 public class DataLoader {
 
-//    final String filePath = "data/germany.json";
-//    List<WWSite> cities = readSitesFromFile(filePath);
-
-
-    public DataLoader() {
-//        System.out.println("loading data");
-//        for (WWSite site : cities) {
-//            System.out.println(site.toString());
-//        }
-    }
-
 
     //CHAT GPT generated ( was too lazy to write it myself :) )
-    static List<WWSite> readSitesFromFile(String filePath) {
+    public static List<WWSite> readSitesFromFile(String filePath) {
         List<WWSite> sites = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
