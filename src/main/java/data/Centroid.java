@@ -27,9 +27,6 @@ public class Centroid {
 
     @Override
     public String toString() {
-        return "Centroid{" +
-                "latitude=" + latitude +
-                ", longitude=" + longitude +
-                '}';
+        return "la: " + latitude + ", lo: " + longitude;
     }
 }

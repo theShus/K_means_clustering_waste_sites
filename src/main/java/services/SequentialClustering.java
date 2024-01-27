@@ -5,10 +5,8 @@ import data.DataSet;
 import data.Site;
 import data.TestResult;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.DecimalFormat;
+import java.util.*;
 
 public class SequentialClustering implements ClusteringService {
 
@@ -20,69 +18,71 @@ public class SequentialClustering implements ClusteringService {
 
     //Testing vars
     private static final Double PRECISION = 0.0;
+    private static final int NUM_SITES_TO_INCREASE = 500;
+    private static final int NUM_CLUSTERS_TO_INCREASE = 5;
+    private static final double RUN_TIME_BLOCK = 5.0;//sec
     private final Map<Integer, TestResult> resultMap = new HashMap<>();
 
-    public SequentialClustering(DataSet data, int numberOfClusters, int numberOfSites, ServiceType testingType) {
+    public SequentialClustering(DataSet data, ServiceType testingType) {
         this.data = data;
+        this.testingType = testingType;
+    }
+
+    @Override
+    public void runTesting(int numberOfClusters, int numberOfSites) {
         this.numberOfClusters = numberOfClusters;
         this.numberOfSites = numberOfSites;
-        this.testingType = testingType;
+        int testsCycledCounter = 0;
+        double startTime, totalRunTime = 0.0;
+        List<Site> sites = data.getNSites(this.numberOfSites);
 
-        runTesting();
-    }
+        System.out.println("Running tests...");
 
-    private void runTesting(){
-        int testsRanCounter = 0;
+        while (true) {
+            startTime = System.currentTimeMillis();
 
-        if (testingType == ServiceType.LOCKED_CLUSTERS){
+            TestResult testResult1 = calculateClusters(sites);
+            TestResult testResult2 = calculateClusters(sites);
+            TestResult testResult3 = calculateClusters(sites);
+            TestResult avgResult = new TestResult(testResult1, testResult2, testResult3);
+            resultMap.put(testsCycledCounter++, avgResult);
 
-            while (true){
-//                long startTime = System.currentTimeMillis();
+            totalRunTime += (System.currentTimeMillis() - startTime) / 1000.0;
 
-                TestResult testResult1 = calculateClusters();
-                TestResult testResult2 = calculateClusters();
-                TestResult testResult3 = calculateClusters();
-                TestResult avgResult = new TestResult(testResult1, testResult2, testResult3);
-
-                resultMap.put(testsRanCounter++, avgResult);
-
-                if (avgResult.getNumberOfLoops() > 200){
+            if (testingType == ServiceType.LOCKED_CLUSTERS) {
+                this.numberOfSites += NUM_SITES_TO_INCREASE;// test demands we increase the num of sites by N every test cycle
+                sites = data.getNSites(this.numberOfSites);
+            }
+            else if (testingType == ServiceType.LOCKET_SITES) {
+                this.numberOfClusters += NUM_CLUSTERS_TO_INCREASE;// test demands we increase the num of sites by 500 every test cycle
+                if (numberOfClusters >= numberOfSites / 3) {
+                    System.err.println("BREAK DUE TO EXCEEDING CLUSTER LIMIT");
                     break;
                 }
-
-//            todo enable time check
-//        long totalTime = System.currentTimeMillis() - startTime;
-//        System.err.println(totalTime);
             }
 
-//            testResult1.print();
-//            testResult2.print();
-//            testResult3.print();
-//
-//            System.out.println("AVG");
-//            avgResult.print();
-
+            if (totalRunTime > RUN_TIME_BLOCK) {
+                System.err.println("BREAK DUE TO EXCEEDING TIME LIMIT");
+                break;
+            }
         }
-        else if (testingType == ServiceType.LOCKET_SITES){
-            System.out.println("TODO");
-        }
+        printTestResults(testsCycledCounter, totalRunTime);
     }
 
 
-    public TestResult calculateClusters() {
+    public TestResult calculateClusters(List<Site> sites) {
+        //data vars
+        double SSE = Double.MAX_VALUE;
+        List<Centroid> centroids = calculateCentroids(sites); //using different centroids in all 3 runs in a test
+
         //helper vars
-        int loopCounter = 0;
+        int cycleCounter = 0;
+        long startTime = System.currentTimeMillis();
         Map<Integer, Integer> clusterSizeCounter = new HashMap<>();
         for (int i = 0; i < numberOfClusters; i++) clusterSizeCounter.put(i, 0);
 
-        //data vars
-        double SSE = Double.MAX_VALUE;
-        List<Centroid> centroids = calculateCentroids();
-        List<Site> sites = this.data.getSites();
-
-        while (true) {
-            // for each record
-            for (var site : sites) {
+        while (true) {//todo proveri mozda ostavlja -1 negde
+            for (Site site : sites) {
                 double minDist = Double.MAX_VALUE;
                 // find the centroid at a minimum distance from it and add the site to its cluster
                 for (int i = 0; i < centroids.size(); i++) {
@@ -94,7 +94,6 @@ public class SequentialClustering implements ClusteringService {
                 }
             }
 
-
             // recompute centroids according to new cluster assignments
             centroids = DataSet.recomputeCentroids(numberOfClusters, sites);
 
@@ -103,13 +102,18 @@ public class SequentialClustering implements ClusteringService {
             if (SSE - newSSE <= PRECISION) break;
             SSE = newSSE;
 
-            loopCounter++;
-
-//            print(loopCounter, centroids, SSE);//todo improve print
+            cycleCounter++;
+//            print(cycleCounter, centroids, SSE);
         }
 
-        for (Site site : sites) clusterSizeCounter.put(site.getClusterNo(), clusterSizeCounter.get(site.getClusterNo()) + 1);
-        return new TestResult(loopCounter, clusterSizeCounter, centroids);
+        for (Site site : sites) {
+            clusterSizeCounter.put(site.getClusterNo(), clusterSizeCounter.get(site.getClusterNo()) + 1);
+        }
+
+        long totalTime = System.currentTimeMillis() - startTime;
+        //return a result of testing (time is parsed do its not 10 decimals long)
+
+        return new TestResult(cycleCounter, clusterSizeCounter, centroids, this.numberOfClusters, this.numberOfSites, totalTime / 1000.0);
     }
 
 //    private void print(int loopCounter, List<Centroid> centroids, Double SSE){
@@ -126,26 +130,70 @@ public class SequentialClustering implements ClusteringService {
 //    }
 
 
-    private List<Centroid> calculateCentroids() {
+    private List<Centroid> calculateCentroids(List<Site> sites) {
         List<Centroid> centroids = new ArrayList<>();
+        Random random = new Random();
 
-        Centroid newCentroid = data.getRandomDataPoint();
-        centroids.add(newCentroid);
-        data.getCentroids().add(newCentroid);
-
-        for (int i = 0; i < numberOfClusters - 1; i++) {//todo stavi ili random ili weighted
-            //weighted
-//            newCentroid = data.calculateWeightedCentroid();
-//            if (newCentroid != null) centroids.add(data.calculateWeightedCentroid());
+//        int randomIndex = random.nextInt(sites.size());
+//        Site randomSite = sites.get(randomIndex);
+//        centroids.add(new Centroid(randomSite.getLatitude(), randomSite.getLongitude()));
+//        Centroid newCentroid;
+//        for (int i = 0; i < numberOfClusters - 1; i++) {
+//            //todo stavi ili random(fix) ili weighted
+//            //weighted
+//            newCentroid = data.calculateWeightedCentroid(centroids);
+//            if (newCentroid != null) centroids.add(data.calculateWeightedCentroid(centroids));
 //            else System.err.println("Failed to calculate centroid");
+//        }
 
-            //random
-            newCentroid = data.getRandomDataPoint();
-            centroids.add(newCentroid);
-            data.getCentroids().add(newCentroid);
+        for (int i = 0; i < numberOfClusters; i++) {
+            while (true) {
+                int randomIndex = random.nextInt(sites.size());
+                Site randomSite = sites.get(randomIndex);
+                Centroid randomCentroid = new Centroid(randomSite.getLatitude(), randomSite.getLongitude());
+
+                // Check if centroids list already contains the generated centroid
+                if (!centroids.contains(randomCentroid)) {
+                    centroids.add(randomCentroid);
+                    break; // Break out of the while loop if the centroid is unique
+                }
+                // If the generated centroid already exists, generate a new one
+            }
         }
+
         return centroids;
     }
 
+
+    private void printTestResults(int testsCycledCounter, double totalRunTime) {
+        DecimalFormat df = new DecimalFormat("#.#####");
+        String cyanColorCode = "\u001B[36m", resetColorCode = "\u001B[0m";
+        Map<Integer, Double> clusterAvgCapacities = new HashMap<>();
+        for (int i = 0; i < numberOfClusters; i++) clusterAvgCapacities.put(i, 0.0);
+
+        //Print results
+        for (Map.Entry<Integer, TestResult> entry : resultMap.entrySet()) {
+            System.out.println("\n====== Test No: " + entry.getKey() + " ======");
+            entry.getValue().print();
+            System.out.println("==================");
+        }
+
+        System.out.println(cyanColorCode + "\n* TEST RESULTS *\n");
+        System.out.println("Total run time (sec): " + Double.parseDouble(df.format((totalRunTime))));
+        System.out.println("Total tests done: " + testsCycledCounter);
+        System.out.println("Current number of clusters: " + this.numberOfClusters);
+        System.out.println("Current number of sites: " + this.numberOfSites);
+        System.out.println("Coordinates of centroids and sizes of clusters are visible in the last test cycle");
+
+        System.out.println("\n* Avg capacity for each cluster *");
+        for (Site site : data.getSites()) {
+            if (site.getClusterNo() == -1) continue;
+            double avgCapacity = (clusterAvgCapacities.get(site.getClusterNo()) + site.getCapacity()) / 2;
+            clusterAvgCapacities.put(site.getClusterNo(), avgCapacity);
+        }
+        for (Map.Entry<Integer, Double> entry : clusterAvgCapacities.entrySet())
+            System.out.println("Cluster " + entry.getKey() + ": " + Double.parseDouble(df.format((entry.getValue()))) + " avg capacity");
+        System.out.println(resetColorCode);
+    }
 
 }

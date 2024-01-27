@@ -6,19 +6,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.IllegalFormatCodePointException;
+import java.util.List;
+import java.util.Random;
 
 public class DataSet {
+
     private final List<Site> sites;
-    private List<Centroid> centroids;//used for initial centroid setup
-    private static final Random random = new Random();
 
     public DataSet(String filePath) {
         this.sites = readSitesFromFile(filePath);
-        centroids = new ArrayList<>();
-//        for (data.WWSite site : sites) System.out.println(site.getLatitude() + " - " + site.getLongitude());
     }
-
 
     //load all sites from file
     public List<Site> readSitesFromFile(String filePath) {
@@ -52,100 +51,82 @@ public class DataSet {
         return sites;
     }
 
-    public List<Site> getNSites(int numberOfSites){
-        if (numberOfSites > sites.size()){
-            List<Site> toReturn = new ArrayList<>();
-            toReturn.addAll(sites);
-            toReturn.addAll(generateNSites(numberOfSites - sites.size()));
-            return toReturn;
+    public List<Site> getNSites(int numberOfSites) {
+        if (sites.size() >= numberOfSites) {
+            return new ArrayList<>(sites.subList(0, numberOfSites));//todo the list can be randomised every time if needed
         }
-        else return getRandomElements(sites, numberOfSites);
+        else {
+            List<Site> generatedSites = generateNSites(numberOfSites - sites.size());
+            sites.addAll(generatedSites);
+            return sites;
+        }
     }
 
-    private List<Site> getRandomElements(List<Site> originalList, int n) {
-        List<Site> randomElements = new ArrayList<>();
-        Set<Integer> selectedIndices = new HashSet<>();
 
-        while (randomElements.size() < n) {
-            int randomIndex = random.nextInt(originalList.size());
-            if (selectedIndices.add(randomIndex)) {
-                // Add the element only if the index is not already selected
-                randomElements.add(originalList.get(randomIndex));
-            }
-        }
-        return randomElements;
-    }
-
-    private List<Site> generateNSites(int numberToGenerate){
+    private List<Site> generateNSites(int numberToGenerate) {
         List<Site> generatedSites = new ArrayList<>();
-        for (int i = 0; i < numberToGenerate; i++) {
-            generatedSites.add(new Site("Generated Site " + i, generateRandomDouble(0, 116024), generateRandomDouble(35, 55), generateRandomDouble(-10, 30)));
+        for (int i = 0; i < numberToGenerate; i++) { //todo generate parameters can be adjusted
+            generatedSites.add(new Site("Generated Site " + i, generateRandomDouble(0, 100), generateRandomDouble(35, 55), generateRandomDouble(-10, 30)));
         }
         return generatedSites;
     }
 
 
-    //finds a random site for the first centroid (rest are found using weighted centroid calculation)
-    public Centroid getRandomDataPoint() {
-        int randomIndex = random.nextInt(sites.size());
-        Site randomSIte = sites.get(randomIndex);
-        return new Centroid(randomSIte.getLatitude(), randomSIte.getLongitude());
-    }
+
 
     public static Double euclideanDistance(Site site, Centroid centroid) {
         double sum = Math.pow(Math.abs(site.getLatitude() - centroid.getLatitude()), 2) + Math.pow(Math.abs(site.getLatitude() - centroid.getLatitude()), 2);
         return Math.sqrt(sum);
     }
 
-    public Centroid calculateWeightedCentroid() {
-        double sum = 0.0;
-
-        // Calculate the sum of all minDistances to the nearest centroid
-        for (Site site : sites) {
-            if (isSiteCentroid(site))
-                continue; // Skip if the site is already a centroid (todo: improve this search mechanism)
-            double minDist = Double.MAX_VALUE;
-            // Find the minimum distance to existing centroids for the current site
-            for (Centroid centroid : centroids) {
-                double distance = euclideanDistance(site, centroid);
-                if (distance < minDist) minDist = distance;
-            }
-            sum += minDist;
-        }
-
-        // Make a threshold that we will use for calculating a new centroid
-        double threshold = sum * random.nextDouble();
-
-        for (Site site : sites) {
-            if (isSiteCentroid(site)) continue;
-            double minDist = Double.MAX_VALUE;
-            // Find the minimum distance to existing centroids for the current site
-            for (Centroid centroid : centroids) {
-                double distance = euclideanDistance(site, centroid);
-                if (distance < minDist) minDist = distance;
-            }
-            sum += minDist;
-
-            // Check if the cumulative sum exceeds the threshold
-            if (sum > threshold) {
-                // Create a new centroid using the latitude and longitude of the selected site
-                Centroid newCentroid = new Centroid(site.getLatitude(), site.getLongitude());
-                centroids.add(newCentroid);
-                return newCentroid;
-            }
-        }
-        // Return null if no new centroid is selected
-        return null;
-    }
-
-
-    private boolean isSiteCentroid(Site site) {
-        for (Centroid centroid : centroids) {
-            if (centroid.getLatitude() == site.getLatitude() && centroid.getLongitude() == site.getLongitude())
-                return true;
-        }
-        return false;
-    }
+//    public Centroid calculateWeightedCentroid(List<Centroid> centroids) {
+//        double sum = 0.0;
+//
+//        // Calculate the sum of all minDistances to the nearest centroid
+//        for (Site site : sites) {
+//            if (isSiteCentroid(site, centroids))
+//                continue; // Skip if the site is already a centroid (todo: improve this search mechanism)
+//            double minDist = Double.MAX_VALUE;
+//            // Find the minimum distance to existing centroids for the current site
+//            for (Centroid centroid : centroids) {
+//                double distance = euclideanDistance(site, centroid);
+//                if (distance < minDist) minDist = distance;
+//            }
+//            sum += minDist;
+//        }
+//
+//        // Make a threshold that we will use for calculating a new centroid
+//        double threshold = sum * random.nextDouble();
+//
+//        for (Site site : sites) {
+//            if (isSiteCentroid(site, centroids)) continue;
+//            double minDist = Double.MAX_VALUE;
+//            // Find the minimum distance to existing centroids for the current site
+//            for (Centroid centroid : centroids) {
+//                double distance = euclideanDistance(site, centroid);
+//                if (distance < minDist) minDist = distance;
+//            }
+//            sum += minDist;
+//
+//            // Check if the cumulative sum exceeds the threshold
+//            if (sum > threshold) {
+//                // Create a new centroid using the latitude and longitude of the selected site
+//                Centroid newCentroid = new Centroid(site.getLatitude(), site.getLongitude());
+//                centroids.add(newCentroid);
+//                return newCentroid;
+//            }
+//        }
+//        // Return null if no new centroid is selected
+//        return null;
+//    }
+//
+//    private boolean isSiteCentroid(Site site, List<Centroid> centroids) {
+//        for (Centroid centroid : centroids) {
+//            if (centroid.getLatitude() == site.getLatitude() && centroid.getLongitude() == site.getLongitude())
+//                return true;
+//        }
+//        return false;
+//    }
 
     public static List<Centroid> recomputeCentroids(int numberOfClusters, List<Site> sites) {
         List<Centroid> centroids = new ArrayList<>();
@@ -156,12 +137,11 @@ public class DataSet {
         return centroids;
     }
 
-
     private static Centroid calculateCentroid(int clusterNo, List<Site> sites) {
         List<Site> sitesInCluster = new ArrayList<>();
 
-        for (Site site: sites){
-            if (site.getClusterNo() == clusterNo){
+        for (Site site : sites) {
+            if (site.getClusterNo() == clusterNo) {
                 sitesInCluster.add(site);
             }
         }
@@ -176,11 +156,25 @@ public class DataSet {
             totalY += site.getLongitude();
         }
 
-        // Calculate the mean of x and y coordinates
-        double meanX = totalX / sitesInCluster.size();
-        double meanY = totalY / sitesInCluster.size();
+//        System.out.println("total for " + sitesInCluster.size());
+//        System.out.println(totalX);
+//        System.out.println(totalY);
 
-        // Create a new centroid with the calculated mean coordinates
+        // Calculate the mean of x and y coordinates
+        double meanX = totalX / (double) sitesInCluster.size();
+        double meanY = totalY / (double) sitesInCluster.size();
+
+//        if (Double.isNaN(meanX) || Double.isNaN(meanY)){
+//            System.out.println("KURACCCC");
+//            System.out.println(meanX);
+//            System.out.println(meanY);
+//            System.out.println(sitesInCluster.size());
+//        }
+
+        if (Double.isNaN(meanX)) meanX = 0.0; //todo ovo je nesto lose
+        if ( Double.isNaN(meanY)) meanY = 0.0;
+
+            // Create a new centroid with the calculated mean coordinates
         return new Centroid(meanX, meanY);
     }
 
@@ -219,14 +213,5 @@ public class DataSet {
     public List<Site> getSites() {
         return sites;
     }
-
-    public List<Centroid> getCentroids() {
-        return centroids;
-    }
-
-    public void setCentroids(List<Centroid> centroids) {
-        this.centroids = centroids;
-    }
-
 
 }
