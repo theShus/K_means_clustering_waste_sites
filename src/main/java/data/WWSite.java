@@ -6,7 +6,7 @@ public class WWSite {
     private double capacity;
     private double latitude;// X cord
     private double longitude;// Y cord
-    private int clusterNumber;// instead of keeping sites in clusters with a list/map we just mark the site instead
+    private int clusterNo;// instead of keeping sites in clusters with a list/map we just mark the site instead
 
 
     public WWSite(String name, double capacity, double latitude, double longitude) {
@@ -14,7 +14,7 @@ public class WWSite {
         this.capacity = capacity;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.clusterNumber = -1;
+        this.clusterNo = -1;
     }
 
     public String getName() {
@@ -49,12 +49,12 @@ public class WWSite {
         this.longitude = longitude;
     }
 
-    public int getClusterNumber() {
-        return clusterNumber;
+    public int getClusterNo() {
+        return clusterNo;
     }
 
-    public void setClusterNumber(int clusterNumber) {
-        this.clusterNumber = clusterNumber;
+    public void setClusterNo(int clusterNo) {
+        this.clusterNo = clusterNo;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class WWSite {
                 ", capacity=" + capacity +
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
-                ", clusterNumber=" + clusterNumber +
+                ", clusterNumber=" + clusterNo +
                 '}';
     }
 }

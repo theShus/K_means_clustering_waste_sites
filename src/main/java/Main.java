@@ -14,7 +14,7 @@ public class Main {
     static final String filePath = "data/germany.json";
 
     //Spec
-    static final int numberOfClusters = 10;
+    static final int numberOfClusters = 4;
     static final ServiceType serviceType = ServiceType.SEQUENTIAL;
 //    static final ServiceType serviceType = ServiceType.PARALLEL;
 //    static final ServiceType serviceType = ServiceType.DISTRIBUTED;
