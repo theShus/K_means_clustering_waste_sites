@@ -6,7 +6,6 @@ import org.jxmapviewer.input.PanMouseInputListener;
 import org.jxmapviewer.input.ZoomMouseWheelListenerCenter;
 import org.jxmapviewer.viewer.DefaultTileFactory;
 import org.jxmapviewer.viewer.GeoPosition;
-
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
 import java.awt.*;
@@ -14,6 +13,7 @@ import java.awt.*;
 public class MapViewPanel extends JPanel {
 
     private final JXMapViewer mapViewer;
+
     public MapViewPanel() {
         setLayout(new BorderLayout());
 
@@ -36,5 +36,8 @@ public class MapViewPanel extends JPanel {
         //set up scroll listener for zoom/un-zoom map
         mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCenter(mapViewer));
     }
+
+    //todo https://www.youtube.com/watch?v=A2LCUbvJEZw
+
 
 }
