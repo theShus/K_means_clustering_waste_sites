@@ -1,6 +1,6 @@
 package data;
 
-public class WWSite {
+public class Site {
 
     private String name;
     private double capacity;
@@ -9,7 +9,7 @@ public class WWSite {
     private int clusterNo;// instead of keeping sites in clusters with a list/map we just mark the site instead
 
 
-    public WWSite(String name, double capacity, double latitude, double longitude) {
+    public Site(String name, double capacity, double latitude, double longitude) {
         this.name = name;
         this.capacity = capacity;
         this.latitude = latitude;

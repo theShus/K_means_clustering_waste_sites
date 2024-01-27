@@ -6,13 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class DataSet {
-    private final List<WWSite> sites;
-    private List<Centroid> centroids;
+    private final List<Site> sites;
+    private List<Centroid> centroids;//used for initial centroid setup
     private static final Random random = new Random();
 
     public DataSet(String filePath) {
@@ -23,8 +21,8 @@ public class DataSet {
 
 
     //load all sites from file
-    public List<WWSite> readSitesFromFile(String filePath) {
-        List<WWSite> sites = new ArrayList<>();
+    public List<Site> readSitesFromFile(String filePath) {
+        List<Site> sites = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -42,7 +40,7 @@ public class DataSet {
                         double latitude = jsonNode.has("la") ? jsonNode.get("la").asDouble() : generateRandomDouble(47, 55);
                         double longitude = jsonNode.has("lo") ? jsonNode.get("lo").asDouble() : generateRandomDouble(5, 14);
 
-                        WWSite site = new WWSite(name, capacity, latitude, longitude);
+                        Site site = new Site(name, capacity, latitude, longitude);
                         sites.add(site);
                     }
                 }
@@ -54,15 +52,47 @@ public class DataSet {
         return sites;
     }
 
+    public List<Site> getNSites(int numberOfSites){
+        if (numberOfSites > sites.size()){
+            List<Site> toReturn = new ArrayList<>();
+            toReturn.addAll(sites);
+            toReturn.addAll(generateNSites(numberOfSites - sites.size()));
+            return toReturn;
+        }
+        else return getRandomElements(sites, numberOfSites);
+    }
+
+    private List<Site> getRandomElements(List<Site> originalList, int n) {
+        List<Site> randomElements = new ArrayList<>();
+        Set<Integer> selectedIndices = new HashSet<>();
+
+        while (randomElements.size() < n) {
+            int randomIndex = random.nextInt(originalList.size());
+            if (selectedIndices.add(randomIndex)) {
+                // Add the element only if the index is not already selected
+                randomElements.add(originalList.get(randomIndex));
+            }
+        }
+        return randomElements;
+    }
+
+    private List<Site> generateNSites(int numberToGenerate){
+        List<Site> generatedSites = new ArrayList<>();
+        for (int i = 0; i < numberToGenerate; i++) {
+            generatedSites.add(new Site("Generated Site " + i, generateRandomDouble(0, 116024), generateRandomDouble(35, 55), generateRandomDouble(-10, 30)));
+        }
+        return generatedSites;
+    }
+
 
     //finds a random site for the first centroid (rest are found using weighted centroid calculation)
     public Centroid getRandomDataPoint() {
         int randomIndex = random.nextInt(sites.size());
-        WWSite randomSIte = sites.get(randomIndex);
+        Site randomSIte = sites.get(randomIndex);
         return new Centroid(randomSIte.getLatitude(), randomSIte.getLongitude());
     }
 
-    public static Double euclideanDistance(WWSite site, Centroid centroid) {
+    public static Double euclideanDistance(Site site, Centroid centroid) {
         double sum = Math.pow(Math.abs(site.getLatitude() - centroid.getLatitude()), 2) + Math.pow(Math.abs(site.getLatitude() - centroid.getLatitude()), 2);
         return Math.sqrt(sum);
     }
@@ -71,7 +101,7 @@ public class DataSet {
         double sum = 0.0;
 
         // Calculate the sum of all minDistances to the nearest centroid
-        for (WWSite site : sites) {
+        for (Site site : sites) {
             if (isSiteCentroid(site))
                 continue; // Skip if the site is already a centroid (todo: improve this search mechanism)
             double minDist = Double.MAX_VALUE;
@@ -86,7 +116,7 @@ public class DataSet {
         // Make a threshold that we will use for calculating a new centroid
         double threshold = sum * random.nextDouble();
 
-        for (WWSite site : sites) {
+        for (Site site : sites) {
             if (isSiteCentroid(site)) continue;
             double minDist = Double.MAX_VALUE;
             // Find the minimum distance to existing centroids for the current site
@@ -109,7 +139,7 @@ public class DataSet {
     }
 
 
-    private boolean isSiteCentroid(WWSite site) {
+    private boolean isSiteCentroid(Site site) {
         for (Centroid centroid : centroids) {
             if (centroid.getLatitude() == site.getLatitude() && centroid.getLongitude() == site.getLongitude())
                 return true;
@@ -117,20 +147,20 @@ public class DataSet {
         return false;
     }
 
-    public List<Centroid> recomputeCentroids(int numberOfClusters) {
+    public static List<Centroid> recomputeCentroids(int numberOfClusters, List<Site> sites) {
         List<Centroid> centroids = new ArrayList<>();
 
         for (int i = 0; i < numberOfClusters; i++) {
-            centroids.add(calculateCentroid(i));
+            centroids.add(calculateCentroid(i, sites));
         }
         return centroids;
     }
 
 
-    private Centroid calculateCentroid(int clusterNo) {
-        List<WWSite> sitesInCluster = new ArrayList<>();
+    private static Centroid calculateCentroid(int clusterNo, List<Site> sites) {
+        List<Site> sitesInCluster = new ArrayList<>();
 
-        for (WWSite site: sites){
+        for (Site site: sites){
             if (site.getClusterNo() == clusterNo){
                 sitesInCluster.add(site);
             }
@@ -141,7 +171,7 @@ public class DataSet {
         double totalY = 0.0;
 
         // Calculate the sum of x and y coordinates
-        for (WWSite site : sitesInCluster) {
+        for (Site site : sitesInCluster) {
             totalX += site.getLatitude();
             totalY += site.getLongitude();
         }
@@ -160,21 +190,21 @@ public class DataSet {
     It is calculated as the sum of the squared distances between each data point in the cluster and its centroid.
     A lower SSE indicates that the data points within the cluster are closer to the centroid suggesting a more compact and well-defined cluster.
     */
-    public double calculateTotalSSE(List<Centroid> centroids) {
+    public static double calculateTotalSSE(List<Centroid> centroids, List<Site> sites) {
         double SSE = 0.0;
 
         // Iterate through each centroid and calculate SSE for its cluster
         for (int i = 0; i < centroids.size(); i++) {
-            SSE += calculateClusterSSE(centroids.get(i), i);
+            SSE += calculateClusterSSE(centroids.get(i), i, sites);
         }
         return SSE;
     }
 
-    public Double calculateClusterSSE(Centroid centroid, int clusterNo) {
+    public static Double calculateClusterSSE(Centroid centroid, int clusterNo, List<Site> sites) {
         double SSE = 0.0;
 
         // Iterate through each site in the cluster and calculate squared Euclidean distance to the centroid
-        for (WWSite site : sites) {
+        for (Site site : sites) {
             if (site.getClusterNo() == clusterNo)
                 SSE += Math.pow(euclideanDistance(site, centroid), 2);
         }
@@ -186,7 +216,7 @@ public class DataSet {
         return min + (max - min) * random.nextDouble();
     }
 
-    public List<WWSite> getSites() {
+    public List<Site> getSites() {
         return sites;
     }
 

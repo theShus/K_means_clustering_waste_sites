@@ -1,9 +1,7 @@
 import data.DataSet;
-import scene.WindowFrame;
 import services.ClusteringService;
 import services.SequentialClustering;
-
-import javax.swing.*;
+import services.ServiceType;
 
 public class Main {
 
@@ -15,9 +13,15 @@ public class Main {
 
     //Spec
     static final int numberOfClusters = 4;
+    static final int numberOfSites = 500;
+
+
     static final ServiceType serviceType = ServiceType.SEQUENTIAL;
-//    static final ServiceType serviceType = ServiceType.PARALLEL;
-//    static final ServiceType serviceType = ServiceType.DISTRIBUTED;
+//    static final services.ServiceType serviceType = services.ServiceType.PARALLEL;
+//    static final services.ServiceType serviceType = services.ServiceType.DISTRIBUTED;
+
+    static final ServiceType testingType = ServiceType.LOCKED_CLUSTERS;
+//    static final services.ServiceType testingType = services.ServiceType.LOCKET_SITES;
 
 
 
@@ -26,9 +30,9 @@ public class Main {
         System.out.println("Loading data set");
         DataSet data = new DataSet(filePath);
 
-        if (serviceType == ServiceType.SEQUENTIAL) clusteringService = new SequentialClustering(data, numberOfClusters);
-//        if (serviceType == ServiceType.PARALLEL) clusteringService = new SequentialClustering(data);
-//        if (serviceType == ServiceType.DISTRIBUTED) clusteringService = new SequentialClustering(data);
+        if (serviceType == ServiceType.SEQUENTIAL) clusteringService = new SequentialClustering(data, numberOfClusters, numberOfSites, testingType);
+//        if (serviceType == services.ServiceType.PARALLEL) clusteringService = new SequentialClustering(data);
+//        if (serviceType == services.ServiceType.DISTRIBUTED) clusteringService = new SequentialClustering(data);
 
 
 
