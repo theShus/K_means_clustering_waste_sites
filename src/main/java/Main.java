@@ -1,28 +1,40 @@
-import data.WWSite;
+import data.DataSet;
 import scene.WindowFrame;
+import services.ClusteringService;
+import services.SequentialClustering;
 
 import javax.swing.*;
-import java.util.List;
-
-import static data.DataLoader.readSitesFromFile;
 
 public class Main {
 
-    public static final String filePath = "data/germany.json";
+    //Services
+    static ClusteringService clusteringService;
+
+    //Data
+    static final String filePath = "data/germany.json";
+
+    //Spec
+    static final int numberOfClusters = 10;
+    static final ServiceType serviceType = ServiceType.SEQUENTIAL;
+//    static final ServiceType serviceType = ServiceType.PARALLEL;
+//    static final ServiceType serviceType = ServiceType.DISTRIBUTED;
+
 
 
     public static void main(String[] args) {
 
         System.out.println("Loading data set");
-        List<WWSite> cities = readSitesFromFile(filePath);
+        DataSet data = new DataSet(filePath);
 
-//        for (data.WWSite site : cities) {
-//            System.out.println(site.toString());
-//        }
+        if (serviceType == ServiceType.SEQUENTIAL) clusteringService = new SequentialClustering(data, numberOfClusters);
+//        if (serviceType == ServiceType.PARALLEL) clusteringService = new SequentialClustering(data);
+//        if (serviceType == ServiceType.DISTRIBUTED) clusteringService = new SequentialClustering(data);
 
-        System.out.println("Starting map");
-        SwingUtilities.invokeLater(WindowFrame::new);
+
+
+
+//        System.out.println("Starting map");
+//        SwingUtilities.invokeLater(WindowFrame::new);
 
     }
-
 }

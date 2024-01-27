@@ -37,7 +37,6 @@ public class MapViewPanel extends JPanel {
         mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCenter(mapViewer));
     }
 
-    //todo https://www.youtube.com/watch?v=A2LCUbvJEZw
 
 
 }
