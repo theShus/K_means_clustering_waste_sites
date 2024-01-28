@@ -4,7 +4,12 @@ import data.TestResult;
 
 public interface ClusteringService {
 
-    void runTesting(int numberOfClusters, int numberOfSites);
+    void runTesting();
 
-    TestResult calculateKMeans (int numberOfClusters, int numberOfSites);
+    TestResult calculateKMeans ();
+
+    void setNumberOfClustersAndSites(int numberOfClusters, int numberOfSites);
+
+    void setTestingType(TestingType setTestingType);
+
 }

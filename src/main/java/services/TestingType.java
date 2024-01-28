@@ -1,8 +1,8 @@
 package services;
 
-public enum ServiceType {
+public enum TestingType {
     //Service type
-    SEQUENTIAL, PARALLEL, DISTRIBUTED,
+//    SEQUENTIAL, PARALLEL, DISTRIBUTED,
 
     //Testing type
     LOCKED_CLUSTERS, LOCKET_SITES

@@ -109,44 +109,12 @@ public class TestResult {
         return sites;
     }
 
-    public int getNumberOfCycles() {
-        return numberOfCycles;
-    }
-
-    public void setNumberOfCycles(int numberOfCycles) {
-        this.numberOfCycles = numberOfCycles;
-    }
-
-    public Map<Integer, Integer> getClusterSizeCounter() {
-        return clusterSizeCounter;
-    }
-
-    public void setClusterSizeCounter(Map<Integer, Integer> clusterSizeCounter) {
-        this.clusterSizeCounter = clusterSizeCounter;
-    }
-
     public List<Centroid> getCentroids() {
         return centroids;
     }
 
-    public void setCentroids(List<Centroid> centroids) {
-        this.centroids = centroids;
-    }
-
     public int getClusterNo() {
         return clusterNo;
-    }
-
-    public void setClusterNo(int clusterNo) {
-        this.clusterNo = clusterNo;
-    }
-
-    public double getRuntime() {
-        return runtime;
-    }
-
-    public void setRuntime(double runtime) {
-        this.runtime = runtime;
     }
 
 }

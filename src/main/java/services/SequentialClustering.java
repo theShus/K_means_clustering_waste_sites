@@ -11,7 +11,7 @@ public class SequentialClustering implements ClusteringService {
 
     //Starting vars
     private final DataSet data;
-    private final ServiceType testingType;
+    private TestingType testingType = null;
     private int numberOfClusters;
     private int numberOfSites;
 
@@ -25,15 +25,15 @@ public class SequentialClustering implements ClusteringService {
     private static final int NUM_CLUSTERS_TO_INCREASE = 5;
     private static final double RUN_TIME_BLOCK = 10.0;//sec
 
-    public SequentialClustering(DataSet data, ServiceType testingType) {
+    public SequentialClustering(DataSet data) {
         this.data = data;
-        this.testingType = testingType;
     }
 
     @Override
-    public void runTesting(int numberOfClusters, int numberOfSites) {
-        this.numberOfClusters = numberOfClusters;
-        this.numberOfSites = numberOfSites;
+    public void runTesting() {
+        if (testingType == null) return;
+//        this.numberOfClusters = numberOfClusters;
+//        this.numberOfSites = numberOfSites;
         int testsCycledCounter = 0;
         double startTime, totalRunTime = 0.0;
         sites = data.getNSites(this.numberOfSites);
@@ -56,11 +56,11 @@ public class SequentialClustering implements ClusteringService {
                 break;
             }
 
-            if (testingType == ServiceType.LOCKED_CLUSTERS) {
+            if (testingType == TestingType.LOCKED_CLUSTERS) {
                 this.numberOfSites += NUM_SITES_TO_INCREASE;// test demands we increase the num of sites by N every test cycle
                 sites = data.getNSites(this.numberOfSites);
             }
-            else if (testingType == ServiceType.LOCKET_SITES) {
+            else if (testingType == TestingType.LOCKET_SITES) {
                 this.numberOfClusters += NUM_CLUSTERS_TO_INCREASE;// test demands we increase the num of sites by 500 every test cycle
                 if (numberOfClusters >= numberOfSites / 3) {
                     System.err.println("BREAK DUE TO EXCEEDING CLUSTER LIMIT");
@@ -72,9 +72,9 @@ public class SequentialClustering implements ClusteringService {
     }
 
     @Override
-    public TestResult calculateKMeans(int numberOfClusters, int numberOfSites) {
-        this.numberOfClusters = numberOfClusters;
-        this.numberOfSites = numberOfSites;
+    public TestResult calculateKMeans() {
+//        this.numberOfClusters = numberOfClusters;
+//        this.numberOfSites = numberOfSites;
         System.out.println("Calculating...");
         sites = data.getNSites(this.numberOfSites);
         return calculateClusters(sites);
@@ -165,8 +165,17 @@ public class SequentialClustering implements ClusteringService {
         System.out.println("Total tests done: " + testsCycledCounter);
         System.out.println("Current number of clusters: " + this.numberOfClusters);
         System.out.println("Current number of sites: " + this.numberOfSites);
-        System.out.println("Coordinates of centroids and sizes of clusters are visible in the last test cycle");
-
     }
 
+
+    @Override
+    public void setNumberOfClustersAndSites(int numberOfClusters, int numberOfSites) {
+        this.numberOfClusters = numberOfClusters;
+        this.numberOfSites = numberOfSites;
+    }
+
+    @Override
+    public void setTestingType(TestingType testingType) {
+        this.testingType = testingType;
+    }
 }
