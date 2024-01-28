@@ -1,10 +1,8 @@
 import data.DataSet;
-import data.Site;
+import data.TestResult;
 import services.ClusteringService;
 import services.SequentialClustering;
 import services.ServiceType;
-
-import java.util.List;
 
 public class Main {
 
@@ -23,6 +21,8 @@ public class Main {
 
     public static void main(String[] args) {
 
+        //todo make terminal cmd
+
         System.out.println("Loading data set");
         DataSet data = new DataSet(filePath);
 
@@ -30,10 +30,13 @@ public class Main {
         if (serviceType == ServiceType.SEQUENTIAL)
             clusteringService = new SequentialClustering(data, testingType);
 
-        if (testingType == ServiceType.LOCKED_CLUSTERS) clusteringService.runTesting(numberOfClusters, 500);
-        if (testingType == ServiceType.LOCKET_SITES) clusteringService.runTesting(5, numberOfSites);
+//        if (testingType == ServiceType.LOCKED_CLUSTERS) clusteringService.runTesting(numberOfClusters, 500);
+//        if (testingType == ServiceType.LOCKET_SITES) clusteringService.runTesting(5, numberOfSites);
 
 
+        TestResult testResult = clusteringService.calculateKMeans(10, 11000);
+
+        testResult.printData();
 
 
 

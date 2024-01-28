@@ -13,16 +13,14 @@ public class TestResult {
     private List<Site> sites;
     private int numberOfCycles;
     private int clusterNo;
-    private int siteNo;
     private double runtime;
 
 
-    public TestResult(int numberOfCycles, Map<Integer, Integer> clusterSizeCounter, List<Centroid> centroids, int clusterNo, int siteNo, double runtime, List<Site> sites) {
+    public TestResult(int numberOfCycles, Map<Integer, Integer> clusterSizeCounter, List<Centroid> centroids, int clusterNo, double runtime, List<Site> sites) {
         this.numberOfCycles = numberOfCycles;
         this.clusterSizeCounter = clusterSizeCounter;
         this.centroids = centroids;
         this.clusterNo = clusterNo;
-        this.siteNo = siteNo;
         this.runtime = runtime;
         this.sites = sites;
     }
@@ -45,8 +43,8 @@ public class TestResult {
         else this.centroids = calculateListMean(testResult1.centroids, testResult2.centroids, testResult3.centroids);
 
         this.clusterNo = (testResult1.clusterNo + testResult2.clusterNo + testResult3.clusterNo) / 3;
-        this.siteNo = (testResult1.siteNo + testResult2.siteNo + testResult3.siteNo) / 3;
         this.runtime = Double.parseDouble(df.format((testResult1.runtime + testResult2.runtime + testResult3.runtime) / 3));
+        this.sites = testResult1.sites; //sites are the same for all 3 tests
     }
 
     private Map<Integer, Integer> calculateMapMean(Map<Integer, Integer> map1, Map<Integer, Integer> map2, Map<Integer, Integer> map3) {
@@ -74,16 +72,37 @@ public class TestResult {
         return meanList;
     }
 
-    public void print() {
-        System.out.println("Cycles: " + numberOfCycles + " | Clusters: " + clusterNo + " | Sites: " + siteNo + " | Runtime: " + runtime);
+    public void printData() {
+        DecimalFormat df = new DecimalFormat("#.#####");
+        Map<Integer, Double> clusterAvgCapacities = calculateAvgSiteCapacities();
 
-        System.out.println("\n*** Cluster Counts: ***");
-        for (Map.Entry<Integer, Integer> entry : clusterSizeCounter.entrySet())
-            System.out.println("Cluster " + entry.getKey() + ": " + entry.getValue() + " sites");
+        System.out.println("Cycles: " + numberOfCycles + " | Clusters: " + clusterNo + " | Sites: " + sites.size() + " | Runtime: " + runtime);
+
+        System.out.println("\n*** Cluster Data: ***");
+        for (Map.Entry<Integer, Integer> entry : clusterSizeCounter.entrySet()){
+            System.out.println("Cluster " + entry.getKey() + ": " + entry.getValue() + " sites" + " || avg capacity: " + Double.parseDouble(df.format((clusterAvgCapacities.get(entry.getKey())))));
+        }
+
 
         System.out.println("\n*** Centroids: ***");
         for (int i = 0; i < centroids.size(); i++)
             System.out.println("Centroid " + i + " : " + centroids.get(i));
+    }
+
+    private  Map<Integer, Double> calculateAvgSiteCapacities(){
+        double avgCapacity;
+        Map<Integer, Double> clusterAvgCapacities = new HashMap<>();
+        for (int i = 0; i < sites.size(); i++) clusterAvgCapacities.put(i, 0.0);
+
+        for (Site site : sites) {
+            if (site.getClusterNo() == -1) {
+                System.err.println("THERE IS AN UNCLUTTERED SITE!");
+                continue;
+            }
+            avgCapacity = (clusterAvgCapacities.get(site.getClusterNo()) + site.getCapacity()) / 2;
+            clusterAvgCapacities.put(site.getClusterNo(), avgCapacity);
+        }
+        return clusterAvgCapacities;
     }
 
     public int getNumberOfCycles() {
@@ -116,14 +135,6 @@ public class TestResult {
 
     public void setClusterNo(int clusterNo) {
         this.clusterNo = clusterNo;
-    }
-
-    public int getSiteNo() {
-        return siteNo;
-    }
-
-    public void setSiteNo(int siteNo) {
-        this.siteNo = siteNo;
     }
 
     public double getRuntime() {

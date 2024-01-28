@@ -75,6 +75,7 @@ public class SequentialClustering implements ClusteringService {
     public TestResult calculateKMeans(int numberOfClusters, int numberOfSites) {
         this.numberOfClusters = numberOfClusters;
         this.numberOfSites = numberOfSites;
+        System.out.println("Calculating...");
         sites = data.getNSites(this.numberOfSites);
         return calculateClusters(sites);
     }
@@ -123,7 +124,7 @@ public class SequentialClustering implements ClusteringService {
         long totalTime = System.currentTimeMillis() - startTime;
         //return a result of testing (time is parsed do its not 10 decimals long)
 
-        return new TestResult(cycleCounter, clusterSizeCounter, centroids, this.numberOfClusters, this.numberOfSites, totalTime / 1000.0, sites);
+        return new TestResult(cycleCounter, clusterSizeCounter, centroids, this.numberOfClusters, totalTime / 1000.0, sites);
     }
 
     private List<Centroid> calculateCentroids(List<Site> sites) {
@@ -156,7 +157,7 @@ public class SequentialClustering implements ClusteringService {
         //Print results
         for (Map.Entry<Integer, TestResult> entry : resultMap.entrySet()) {
             System.out.println("\n====== Test No: " + entry.getKey() + " ======");
-            entry.getValue().print();
+            entry.getValue().printData();
             System.out.println("==================");
         }
 
@@ -167,23 +168,6 @@ public class SequentialClustering implements ClusteringService {
         System.out.println("Current number of sites: " + this.numberOfSites);
         System.out.println("Coordinates of centroids and sizes of clusters are visible in the last test cycle");
 
-
-        System.out.println("\n* Avg capacity for each cluster *");
-
-        Map<Integer, Double> clusterAvgCapacities = new HashMap<>();
-        for (int i = 0; i < numberOfClusters; i++) clusterAvgCapacities.put(i, 0.0);
-
-        for (Site site : sites) {
-            if (site.getClusterNo() == -1) {
-                System.err.println("THERE IS AN UNCLUTTERED SITE!");
-                continue;
-            }
-            double avgCapacity = (clusterAvgCapacities.get(site.getClusterNo()) + site.getCapacity()) / 2;
-            clusterAvgCapacities.put(site.getClusterNo(), avgCapacity);
-        }
-
-        for (Map.Entry<Integer, Double> entry : clusterAvgCapacities.entrySet())
-            System.out.println("Cluster " + entry.getKey() + ": " + Double.parseDouble(df.format((entry.getValue()))) + " avg capacity");
     }
 
 }
