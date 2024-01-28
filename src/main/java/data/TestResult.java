@@ -105,6 +105,10 @@ public class TestResult {
         return clusterAvgCapacities;
     }
 
+    public List<Site> getSites() {
+        return sites;
+    }
+
     public int getNumberOfCycles() {
         return numberOfCycles;
     }

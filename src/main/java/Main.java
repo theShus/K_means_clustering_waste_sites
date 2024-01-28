@@ -1,8 +1,13 @@
 import data.DataSet;
+import data.Site;
 import data.TestResult;
+import scene.WindowFrame;
 import services.ClusteringService;
 import services.SequentialClustering;
 import services.ServiceType;
+
+import javax.swing.*;
+import java.util.List;
 
 public class Main {
 
@@ -27,20 +32,16 @@ public class Main {
         DataSet data = new DataSet(filePath);
 
         System.out.println("Loading service");
-        if (serviceType == ServiceType.SEQUENTIAL)
-            clusteringService = new SequentialClustering(data, testingType);
-
+        if (serviceType == ServiceType.SEQUENTIAL) clusteringService = new SequentialClustering(data, testingType);
 //        if (testingType == ServiceType.LOCKED_CLUSTERS) clusteringService.runTesting(numberOfClusters, 500);
 //        if (testingType == ServiceType.LOCKET_SITES) clusteringService.runTesting(5, numberOfSites);
 
 
-        TestResult testResult = clusteringService.calculateKMeans(10, 11000);
-
+        TestResult testResult = clusteringService.calculateKMeans(5, 10000);
         testResult.printData();
 
 
-
-//        System.out.println("Starting map");
-//        SwingUtilities.invokeLater(WindowFrame::new);
+        System.out.println("Starting map...");
+        SwingUtilities.invokeLater(() -> new WindowFrame(testResult));
     }
 }

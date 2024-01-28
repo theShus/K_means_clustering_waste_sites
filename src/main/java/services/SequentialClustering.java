@@ -136,7 +136,6 @@ public class SequentialClustering implements ClusteringService {
                 int randomIndex = random.nextInt(sites.size());
                 Site randomSite = sites.get(randomIndex);
                 Centroid randomCentroid = new Centroid(randomSite.getLatitude(), randomSite.getLongitude());
-
                 // Check if centroids list already contains the generated centroid
                 if (!centroids.contains(randomCentroid)) {
                     centroids.add(randomCentroid);
@@ -149,8 +148,7 @@ public class SequentialClustering implements ClusteringService {
         return centroids;
     }
 
-
-    private void printTestResults(int testsCycledCounter, double totalRunTime) {//todo check for remaining -1
+    private void printTestResults(int testsCycledCounter, double totalRunTime) {
         DecimalFormat df = new DecimalFormat("#.#####");
         String cyanColorCode = "\u001B[36m", resetColorCode = "\u001B[0m";
 
