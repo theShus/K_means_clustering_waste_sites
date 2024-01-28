@@ -37,7 +37,7 @@ public class Main {
 //        if (testingType == ServiceType.LOCKET_SITES) clusteringService.runTesting(5, numberOfSites);
 
 
-        TestResult testResult = clusteringService.calculateKMeans(5, 10000);
+        TestResult testResult = clusteringService.calculateKMeans(7, 10000);
         testResult.printData();
 
 

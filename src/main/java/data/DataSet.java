@@ -68,7 +68,7 @@ public class DataSet {
     }
 
     public static Double euclideanDistance(Site site, Centroid centroid) {
-        double sum = Math.pow(Math.abs(site.getLatitude() - centroid.getLatitude()), 2) + Math.pow(Math.abs(site.getLatitude() - centroid.getLatitude()), 2);
+        double sum = Math.pow(Math.abs(site.getLatitude() - centroid.getLatitude()), 2) + Math.pow(Math.abs(site.getLongitude() - centroid.getLongitude()), 2);
         return Math.sqrt(sum);
     }
 

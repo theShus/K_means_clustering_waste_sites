@@ -106,6 +106,7 @@ public class SequentialClustering implements ClusteringService {
                 }
             }
 
+
             // recompute centroids according to new cluster assignments
             centroids = DataSet.recomputeCentroids(numberOfClusters, sites);
 
