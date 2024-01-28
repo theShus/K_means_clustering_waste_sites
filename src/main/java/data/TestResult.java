@@ -8,23 +8,23 @@ import java.util.Map;
 
 public class TestResult {
 
-    private int numberOfCycles;
     private Map<Integer, Integer> clusterSizeCounter;
     private List<Centroid> centroids;
+    private List<Site> sites;
+    private int numberOfCycles;
     private int clusterNo;
     private int siteNo;
     private double runtime;
 
-    boolean clusterFailed = false;//todo remove
-    boolean centroidFailed = false;//todo remove
 
-    public TestResult(int numberOfCycles, Map<Integer, Integer> clusterSizeCounter, List<Centroid> centroids, int clusterNo, int siteNo, double runtime) {
+    public TestResult(int numberOfCycles, Map<Integer, Integer> clusterSizeCounter, List<Centroid> centroids, int clusterNo, int siteNo, double runtime, List<Site> sites) {
         this.numberOfCycles = numberOfCycles;
         this.clusterSizeCounter = clusterSizeCounter;
         this.centroids = centroids;
         this.clusterNo = clusterNo;
         this.siteNo = siteNo;
         this.runtime = runtime;
+        this.sites = sites;
     }
 
     //Get avg results from 3 tests ran
@@ -35,13 +35,11 @@ public class TestResult {
 
         //in case something breaks and list are not same size
         if (testResult1.clusterSizeCounter.size() != testResult2.clusterSizeCounter.size() && testResult2.clusterSizeCounter.size() != testResult3.clusterSizeCounter.size()) {
-            clusterFailed = true;
             this.clusterSizeCounter = null;
         }
         else this.clusterSizeCounter = calculateMapMean(testResult1.clusterSizeCounter, testResult2.clusterSizeCounter, testResult3.clusterSizeCounter);
 
         if (testResult1.centroids.size() != testResult2.centroids.size() && testResult2.centroids.size() != testResult3.centroids.size()) {
-            centroidFailed = true;
             this.centroids = null;
         }
         else this.centroids = calculateListMean(testResult1.centroids, testResult2.centroids, testResult3.centroids);
@@ -71,16 +69,6 @@ public class TestResult {
             double meanLatitude = (centroid1.getLatitude() + centroid2.getLatitude() + centroid3.getLatitude()) / 3.0;
             double meanLongitude = (centroid1.getLongitude() + centroid2.getLongitude() + centroid3.getLongitude()) / 3.0;
             Centroid meanCentroid = new Centroid(meanLatitude, meanLongitude);
-
-
-//            if (Double.isNaN(meanCentroid.getLatitude()) || Double.isNaN(meanCentroid.getLongitude()) ){
-//                System.out.println("KURAC");
-//                System.out.println(centroid1);
-//                System.out.println(centroid2);
-//                System.out.println(centroid3);
-//                System.out.println(meanCentroid);
-//            }
-
             meanList.add(meanCentroid);
         }
         return meanList;
@@ -88,8 +76,6 @@ public class TestResult {
 
     public void print() {
         System.out.println("Cycles: " + numberOfCycles + " | Clusters: " + clusterNo + " | Sites: " + siteNo + " | Runtime: " + runtime);
-
-        System.out.println("Cluster failed: " + clusterFailed + " centroid failed: " + centroidFailed);
 
         System.out.println("\n*** Cluster Counts: ***");
         for (Map.Entry<Integer, Integer> entry : clusterSizeCounter.entrySet())
