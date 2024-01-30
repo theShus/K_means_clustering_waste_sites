@@ -11,20 +11,11 @@ import java.util.Scanner;
 
 public class Main {
 
-    //Data
     static final String filePath = "data/germany.json";
 
-    //Services
     public static ClusteringService clusteringService;
 
     private static final Scanner scanner = new Scanner(System.in);
-
-    //Spec
-    // >>>> CHANGE THESE PARAMETERS TO MODIFY THE PROGRAM <<<<
-//    static final TestingType TESTING_TYPE = TestingType.SEQUENTIAL; // SEQUENTIAL / PARALLEL / DISTRIBUTED
-//    static final TestingType testingType = TestingType.LOCKED_CLUSTERS; // LOCKED_CLUSTERS / LOCKET_SITES
-//    static int numberOfClusters = 20;
-//    static int numberOfSites = 30000;
 
     public static void main(String[] args) {
         DataSet data = new DataSet(filePath);
