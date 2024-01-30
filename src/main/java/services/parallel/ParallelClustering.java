@@ -1,13 +1,17 @@
-package services;
+package services.parallel;
 
 import data.Centroid;
 import data.DataSet;
 import data.Site;
 import data.TestResult;
+import services.ClusteringService;
+import services.TestingType;
+
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.*;
 
-public class SequentialClustering implements ClusteringService {
+public class ParallelClustering implements ClusteringService {
 
     //Starting vars
     private final DataSet data;
@@ -17,15 +21,21 @@ public class SequentialClustering implements ClusteringService {
 
     //Testing vars
     private final Map<Integer, TestResult> resultMap = new HashMap<>();
-    private List<Site> sites;
     private double runTimeBlock = 10.0;//sec
+    private List<Site> sites;
 
     //Set up vars
-    private static final Double PRECISION = 0.0;
     private static final int NUM_SITES_TO_INCREASE = 500;
     private static final int NUM_CLUSTERS_TO_INCREASE = 5;
+    private static final Double PRECISION = 0.0;
 
-    public SequentialClustering(DataSet data) {
+    //Threads
+    ExecutorService threadPool = Executors.newCachedThreadPool();
+    private final ExecutorCompletionService<List<Site>> clusterCompletionService = new ExecutorCompletionService<>(threadPool);
+    private final ExecutorCompletionService<Centroid> centroidCompletionService = new ExecutorCompletionService<>(threadPool);
+
+
+    public ParallelClustering(DataSet data) {
         this.data = data;
     }
 
@@ -42,6 +52,7 @@ public class SequentialClustering implements ClusteringService {
         while (true) {
             startTime = System.currentTimeMillis();
 
+            //todo the entire testing process can be divided into 3 separate threads
             TestResult testResult1 = calculateClusters(sites);
             TestResult testResult2 = calculateClusters(sites);
             TestResult testResult3 = calculateClusters(sites);
@@ -88,23 +99,14 @@ public class SequentialClustering implements ClusteringService {
         long startTime = System.currentTimeMillis();
         Map<Integer, Integer> clusterSizeCounter = new HashMap<>();
         for (int i = 0; i < numberOfClusters; i++) clusterSizeCounter.put(i, 0);
-        double minDist, dist, newSSE;
+        double newSSE;
 
         while (true) {
-            for (Site site : sites) {
-                minDist = Double.MAX_VALUE;
-                // find the centroid at a minimum distance from it and add the site to its cluster
-                for (int i = 0; i < centroids.size(); i++) {
-                    dist = DataSet.euclideanDistance(site, centroids.get(i));
-                    if (dist < minDist) {
-                        minDist = dist;
-                        site.setClusterNo(i);
-                    }
-                }
-            }
+            //clustering is done with threads by dividing sites into batches and adding them to specific
+            sites = calculateClustersThreaded(sites, centroids);
 
             // recompute centroids according to new cluster assignments
-            centroids = DataSet.recomputeCentroids(numberOfClusters, sites);
+            centroids = recomputeCentroidsThreaded(numberOfClusters, sites);
 
             // exit condition, SSE changed less than PRECISION parameter
             newSSE = DataSet.calculateTotalSSE(centroids, sites);
@@ -119,6 +121,62 @@ public class SequentialClustering implements ClusteringService {
         long totalTime = System.currentTimeMillis() - startTime;
         //return a result of testing (time is parsed so its not 10 decimals long)
         return new TestResult(cycleCounter, clusterSizeCounter, centroids, this.numberOfClusters, totalTime / 1000.0, sites);
+    }
+
+    //this way isn't the most efficient because its creating new lists
+    //thread safe list could be used but still isn't much better
+    private List<Site> calculateClustersThreaded(List<Site> sites, List<Centroid> centroids) {
+        int batchSize = 1000; //take 1000 sites for one thread
+        List<Future<List<Site>>> clusteringFutureResults = new ArrayList<>();
+
+        for (int i = 0; i < sites.size(); i += batchSize) {
+            int endIndex = Math.min(i + batchSize, sites.size());//get batch or remaining (if less than batch size)
+            List<Site> sublist = sites.subList(i, endIndex);// Get the sublist of sites for the current batch
+            clusteringFutureResults.add(this.clusterCompletionService.submit(new ClusteringWorker(sublist, centroids)));// sent a sub list to be clustered
+        }
+        return retrieveCalculatedClusters(clusteringFutureResults);
+    }
+
+    private List<Site> retrieveCalculatedClusters(List<Future<List<Site>>> futureResults){
+        if (futureResults == null) return null;
+        List<Site> clusteredSites = new ArrayList<>();
+
+        for (Future<List<Site>> futureSites: futureResults) {//go through all future results and get new list of clustered sites
+            try {
+                clusteredSites.addAll(futureSites.get());// .get() is blocking and will wait for the result, will not skip if it isn't finished
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return clusteredSites;
+    }
+
+    private List<Centroid> recomputeCentroidsThreaded(int numberOfClusters, List<Site> sites){
+        List<Future<Centroid>> centroidsFutureResults = new ArrayList<>();
+        Map<Integer, List<Site>> sitesInCluster = new HashMap<>();
+        for (int i = 0; i < numberOfClusters; i++) sitesInCluster.put(i, new ArrayList<>());
+
+        for (Site site : sites) {//we divide sites into the map so we dont have to iterate through all sited for every cluster over and over
+            sitesInCluster.get(site.getClusterNo()).add(site);
+        }
+        for (int i = 0; i < numberOfClusters; i++) {
+            centroidsFutureResults.add(this.centroidCompletionService.submit(new CentroidRecomputeWorker(sitesInCluster.get(i))));
+        }
+        return retrieveCalculatedCentroids(centroidsFutureResults);
+    }
+
+    private List<Centroid> retrieveCalculatedCentroids(List<Future<Centroid>> futureResults){
+        if (futureResults == null) return null;
+        List<Centroid> recomputedCentroids = new ArrayList<>();
+
+        for (Future<Centroid> centroidFuture: futureResults) {
+            try {
+                recomputedCentroids.add(centroidFuture.get());// .get() is blocking and will wait for the result, will not skip if it isn't finished
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return recomputedCentroids;
     }
 
 
@@ -139,7 +197,6 @@ public class SequentialClustering implements ClusteringService {
         System.out.println("Current number of clusters: " + this.numberOfClusters);
         System.out.println("Current number of sites: " + this.numberOfSites);
     }
-
 
     @Override
     public void setNumberOfClustersAndSites(int numberOfClusters, int numberOfSites) {

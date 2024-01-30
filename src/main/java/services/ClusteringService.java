@@ -12,4 +12,6 @@ public interface ClusteringService {
 
     void setTestingType(TestingType setTestingType);
 
+    void setRunTimeBlock (double runTimeBlock);
+
 }

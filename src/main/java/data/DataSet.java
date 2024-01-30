@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class DataSet {
 
@@ -45,22 +43,20 @@ public class DataSet {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return sites;
     }
 
     public List<Site> getNSites(int numberOfSites) {
         if (sites.size() >= numberOfSites) {
             return new ArrayList<>(sites.subList(0, numberOfSites));//the list can be randomised every time if needed
-        } else {
+        }
+        else {
             List<Site> generatedSites = generateNSites(numberOfSites - sites.size());
             sites.addAll(generatedSites);
             return sites;
         }
     }
 
-
-    //todo https://stackoverflow.com/questions/47692726/lightweight-tool-for-generating-random-coordinates-for-specific-region-country
     private List<Site> generateNSites(int numberToGenerate) {
         List<Site> generatedSites = new ArrayList<>();
         for (int i = 0; i < numberToGenerate; i++) { //generate parameters can be adjusted
@@ -69,29 +65,42 @@ public class DataSet {
         return generatedSites;
     }
 
-    public static Double euclideanDistance(Site site, Centroid centroid) {
-        double sum = Math.pow(Math.abs(site.getLatitude() - centroid.getLatitude()), 2) + Math.pow(Math.abs(site.getLongitude() - centroid.getLongitude()), 2);
-        return Math.sqrt(sum);
-    }
-
-    public static List<Centroid> recomputeCentroids(int numberOfClusters, List<Site> sites) {
+    public List<Centroid> getFirstCentroids(List<Site> sites, int numberOfClusters) {
         List<Centroid> centroids = new ArrayList<>();
+        Random random = new Random();
 
         for (int i = 0; i < numberOfClusters; i++) {
-            centroids.add(calculateCentroid(i, sites));
+            while (true) {
+                int randomIndex = random.nextInt(sites.size());
+                Site randomSite = sites.get(randomIndex);
+                Centroid randomCentroid = new Centroid(randomSite.getLatitude(), randomSite.getLongitude());
+                // Check if centroids list already contains the generated centroid
+                if (!centroids.contains(randomCentroid)) {
+                    centroids.add(randomCentroid);
+                    break; // Break out of the while loop if the centroid is unique
+                }
+                // If the generated centroid already exists, generate a new one
+            }
         }
         return centroids;
     }
 
-    private static Centroid calculateCentroid(int clusterNo, List<Site> sites) {
-        List<Site> sitesInCluster = new ArrayList<>();
+    public static List<Centroid> recomputeCentroids(int numberOfClusters, List<Site> sites) {
+        List<Centroid> centroids = new ArrayList<>();
+        Map<Integer, List<Site>> sitesInCluster = new HashMap<>();
+        for (int i = 0; i < numberOfClusters; i++) sitesInCluster.put(i, new ArrayList<>());
 
-        for (Site site : sites) {
-            if (site.getClusterNo() == clusterNo) {
-                sitesInCluster.add(site);
-            }
+        for (Site site : sites) {//we divide sites into the map so we dont have to iterate through all sited for every cluster over and over
+            sitesInCluster.get(site.getClusterNo()).add(site);
         }
 
+        for (int i = 0; i < numberOfClusters; i++) {
+            centroids.add(calculateCentroid(sitesInCluster.get(i)));
+        }
+        return centroids;
+    }
+
+    private static Centroid calculateCentroid(List<Site> sitesInCluster) {
         // Calculate new cluster position based on site coordinates
         double totalX = 0.0;
         double totalY = 0.0;
@@ -138,6 +147,11 @@ public class DataSet {
                 SSE += Math.pow(euclideanDistance(site, centroid), 2);
         }
         return SSE;
+    }
+
+    public static Double euclideanDistance(Site site, Centroid centroid) {
+        double sum = Math.pow(Math.abs(site.getLatitude() - centroid.getLatitude()), 2) + Math.pow(Math.abs(site.getLongitude() - centroid.getLongitude()), 2);
+        return Math.sqrt(sum);
     }
 
     private static double generateRandomDouble(double min, double max) {

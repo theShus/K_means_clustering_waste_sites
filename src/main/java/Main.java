@@ -4,6 +4,7 @@ import scene.WindowFrame;
 import services.ClusteringService;
 import services.SequentialClustering;
 import services.TestingType;
+import services.parallel.ParallelClustering;
 
 import javax.swing.*;
 import java.util.Scanner;
@@ -16,9 +17,7 @@ public class Main {
     //Services
     public static ClusteringService clusteringService;
 
-    //
     private static final Scanner scanner = new Scanner(System.in);
-
 
     //Spec
     // >>>> CHANGE THESE PARAMETERS TO MODIFY THE PROGRAM <<<<
@@ -42,7 +41,7 @@ public class Main {
         System.out.println("Loading desired processing type...\n");
         switch (parameter){
             case 1 -> clusteringService = new SequentialClustering(data);
-            case 2 -> System.out.println("Work in progress...");
+            case 2 -> clusteringService = new ParallelClustering(data);
             case 3 -> System.out.println("Work in progress...");
         }
 
@@ -58,11 +57,16 @@ public class Main {
                         1. Testing with LOCKED CLUSTERS and ramping sites
                         2. Testing with LOCKED SITES and ramping clusters""");
             parameter = scanner.nextInt();
+
+            System.out.println("Please insert the desired run time in sec (preferable below 60)");
+            clusteringService.setRunTimeBlock(scanner.nextInt());
+
             if (parameter == 1) {
                 System.out.println("Please insert the desired number of clusters");
                 clusteringService.setNumberOfClustersAndSites(scanner.nextInt(), 500);
                 clusteringService.setTestingType(TestingType.LOCKED_CLUSTERS);
-            } else if (parameter == 2) {
+            }
+            else if (parameter == 2) {
                 System.out.println("Please insert the desired number of sites");
                 clusteringService.setNumberOfClustersAndSites(5, scanner.nextInt());
                 clusteringService.setTestingType(TestingType.LOCKET_SITES);

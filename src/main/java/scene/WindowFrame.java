@@ -1,11 +1,8 @@
 package scene;
 
-import data.Site;
 import data.TestResult;
-
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 
 public class WindowFrame extends JFrame {
@@ -19,6 +16,8 @@ public class WindowFrame extends JFrame {
 
         MapViewPanel mapViewPanel = new MapViewPanel();
         getContentPane().add(mapViewPanel);
+
+        //todo pokazi i sliku pre i sliku posle
 
         mapViewPanel.addDots(testResult.getSites(), testResult.getClusterNo(), testResult.getCentroids() );
 
