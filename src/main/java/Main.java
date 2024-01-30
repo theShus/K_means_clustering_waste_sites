@@ -4,7 +4,7 @@ import scene.WindowFrame;
 import services.ClusteringService;
 import services.SequentialClustering;
 import services.TestingType;
-import services.parallel.ParallelClustering;
+import services.ParallelClustering;
 
 import javax.swing.*;
 import java.util.Scanner;

@@ -1,11 +1,11 @@
-package services.parallel;
+package services;
 
 import data.Centroid;
 import data.DataSet;
 import data.Site;
 import data.TestResult;
-import services.ClusteringService;
-import services.TestingType;
+import services.parallelWorkers.CentroidRecomputeWorker;
+import services.parallelWorkers.ClusteringWorker;
 
 import java.text.DecimalFormat;
 import java.util.*;
