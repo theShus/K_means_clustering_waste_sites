@@ -2,6 +2,7 @@ package data;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -31,7 +32,7 @@ public class DataSet {
                     for (JsonNode jsonNode : jsonNodeArray) {
                         // Check if each field is present before retrieving its value, if not generate a random value
                         String name = jsonNode.has("name") ? jsonNode.get("name").asText() : "PlaceHolder Name";
-                        double capacity = jsonNode.has("capacity") ? jsonNode.get("capacity").asDouble() : generateRandomDouble(0, 116024);
+                        double capacity = jsonNode.has("capacity") ? jsonNode.get("capacity").asDouble() : generateRandomDouble(0, 100);
                         double latitude = jsonNode.has("la") ? jsonNode.get("la").asDouble() : generateRandomDouble(47, 55);
                         double longitude = jsonNode.has("lo") ? jsonNode.get("lo").asDouble() : generateRandomDouble(5, 14);
 
@@ -49,8 +50,7 @@ public class DataSet {
     public List<Site> getNSites(int numberOfSites) {
         if (sites.size() >= numberOfSites) {
             return new ArrayList<>(sites.subList(0, numberOfSites));//the list can be randomised every time if needed
-        }
-        else {
+        } else {
             List<Site> generatedSites = generateNSites(numberOfSites - sites.size());
             sites.addAll(generatedSites);
             return sites;

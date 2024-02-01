@@ -58,21 +58,16 @@ public class CalculateThread implements Runnable {
                         sequentialService.getTestCyclesCounter(),
                         sequentialService.getResultMap()
                 );
-
                 outSocket.writeObject(resultDataPackage);
-            }
-            else {
+            } else {
                 testResult = sequentialService.calculateKMeans();
                 outSocket.writeObject(testResult);
             }
 
             outSocket.flush();
-
-        }
-        catch (IOException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
-        }
-        finally {
+        } finally {
             try {
                 if (inSocket != null) inSocket.close();
                 if (outSocket != null) outSocket.close();
@@ -81,6 +76,5 @@ public class CalculateThread implements Runnable {
                 e.printStackTrace();
             }
         }
-
     }
 }

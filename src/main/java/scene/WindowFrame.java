@@ -1,6 +1,7 @@
 package scene;
 
 import data.TestResult;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -17,9 +18,7 @@ public class WindowFrame extends JFrame {
         MapViewPanel mapViewPanel = new MapViewPanel();
         getContentPane().add(mapViewPanel);
 
-        //todo pokazi i sliku pre i sliku posle
-
-        mapViewPanel.addDots(testResult.getSites(), testResult.getClusterNo(), testResult.getCentroids() );
+        mapViewPanel.addDots(testResult.getSites(), testResult.getClusterNo(), testResult.getCentroids());
 
         setVisible(true);
     }

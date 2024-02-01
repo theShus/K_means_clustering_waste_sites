@@ -17,15 +17,9 @@ public class DotWaypointRenderer implements WaypointRenderer<Waypoint> {
         int x = (int) point.getX();
         int y = (int) point.getY();
 
-        // Draw an oval using the color from the ColorWaypoint
-//        g.setColor(colorWaypoint.getColor());
-
-
-//        g.fillOval(x - 5 / 2, y - 5 / 2, 10 / 2, 10 / 2); // Three times smaller
-
         if (colorWaypoint.isCentroid()) {
             g.setColor(Color.BLACK);
-            g.fillOval(x - 5 , y - 5 , 10 , 10 ); // Three times smaller
+            g.fillOval(x - 5, y - 5, 10, 10); // Three times smaller
         } else {
             g.setColor(colorWaypoint.getColor());
             g.fillOval(x - 5 / 2, y - 5 / 2, 10 / 2, 10 / 2); // Three times smaller
