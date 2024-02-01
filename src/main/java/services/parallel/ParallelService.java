@@ -1,21 +1,23 @@
-package services;
+package services.parallel;
 
 import data.Centroid;
 import data.DataSet;
 import data.Site;
 import data.TestResult;
-import services.parallelWorkers.CentroidRecomputeWorker;
-import services.parallelWorkers.ClusteringWorker;
+import services.ClusteringService;
+import services.TestingType;
+import services.parallel.workers.CentroidRecomputeWorker;
+import services.parallel.workers.ClusteringWorker;
 
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
-public class ParallelClustering implements ClusteringService {
+public class ParallelService implements ClusteringService {
 
     //Starting vars
     private final DataSet data;
-    private TestingType testingType = null;
+    private TestingType testingType;
     private int numberOfClusters;
     private int numberOfSites;
 
@@ -35,7 +37,7 @@ public class ParallelClustering implements ClusteringService {
     private final ExecutorCompletionService<Centroid> centroidCompletionService = new ExecutorCompletionService<>(threadPool);
 
 
-    public ParallelClustering(DataSet data) {
+    public ParallelService(DataSet data) {
         this.data = data;
     }
 

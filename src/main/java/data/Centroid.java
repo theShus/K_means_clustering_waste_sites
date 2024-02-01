@@ -1,6 +1,8 @@
 package data;
 
-public class Centroid {
+import java.io.Serializable;
+
+public class Centroid implements Serializable {
     private Double latitude;
     private Double longitude;
 

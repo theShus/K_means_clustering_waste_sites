@@ -1,12 +1,13 @@
 package data;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TestResult {
+public class TestResult implements Serializable {
 
     private Map<Integer, Integer> clusterSizeCounter;
     private List<Centroid> centroids;

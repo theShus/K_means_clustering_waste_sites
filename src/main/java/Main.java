@@ -2,11 +2,13 @@ import data.DataSet;
 import data.TestResult;
 import scene.WindowFrame;
 import services.ClusteringService;
-import services.SequentialClustering;
+import services.SequentialService;
 import services.TestingType;
-import services.ParallelClustering;
+import services.distributed.DistributedService;
+import services.parallel.ParallelService;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
@@ -17,7 +19,7 @@ public class Main {
 
     private static final Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         DataSet data = new DataSet(filePath);
         int parameter;
 
@@ -26,15 +28,17 @@ public class Main {
                 Select desired processing type (insert number):
                     1. Sequential
                     2. Parallel
-                    3. Distributed""");
+                    3. Distributed (insure the server is running)
+                    """);
         parameter = scanner.nextInt();
 
         System.out.println("Loading desired processing type...\n");
         switch (parameter){
-            case 1 -> clusteringService = new SequentialClustering(data);
-            case 2 -> clusteringService = new ParallelClustering(data);
-            case 3 -> System.out.println("Work in progress...");
+            case 1 -> clusteringService = new SequentialService(data);
+            case 2 -> clusteringService = new ParallelService(data);
+            case 3 -> clusteringService = new DistributedService(data);
         }
+
 
         System.out.println("""
                 Select desired work (insert number):

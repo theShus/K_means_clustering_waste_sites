@@ -1,6 +1,8 @@
 package data;
 
-public class Site {
+import java.io.Serializable;
+
+public class Site implements Serializable {
 
     private String name;
     private double capacity;

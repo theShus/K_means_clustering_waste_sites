@@ -7,11 +7,11 @@ import data.TestResult;
 import java.text.DecimalFormat;
 import java.util.*;
 
-public class SequentialClustering implements ClusteringService {
+public class SequentialService implements ClusteringService {
 
     //Starting vars
     private final DataSet data;
-    private TestingType testingType = null;
+    private TestingType testingType;
     private int numberOfClusters;
     private int numberOfSites;
 
@@ -19,13 +19,15 @@ public class SequentialClustering implements ClusteringService {
     private final Map<Integer, TestResult> resultMap = new HashMap<>();
     private List<Site> sites;
     private double runTimeBlock = 10.0;//sec
+    private double totalRunTime = 0.0;
+    private int testCyclesCounter = 0;
 
     //Set up vars
     private static final Double PRECISION = 0.0;
     private static final int NUM_SITES_TO_INCREASE = 500;
     private static final int NUM_CLUSTERS_TO_INCREASE = 5;
 
-    public SequentialClustering(DataSet data) {
+    public SequentialService(DataSet data) {
         this.data = data;
     }
 
@@ -33,8 +35,7 @@ public class SequentialClustering implements ClusteringService {
     public void runTesting() {
         if (testingType == null) return;
 
-        int testsCycledCounter = 0;
-        double startTime, totalRunTime = 0.0;
+        double startTime;
         sites = data.getNSites(this.numberOfSites);
 
         System.out.println("Running tests...");
@@ -46,7 +47,7 @@ public class SequentialClustering implements ClusteringService {
             TestResult testResult2 = calculateClusters(sites);
             TestResult testResult3 = calculateClusters(sites);
             TestResult avgResult = new TestResult(testResult1, testResult2, testResult3);
-            resultMap.put(testsCycledCounter++, avgResult);
+            resultMap.put(testCyclesCounter++, avgResult);
 
             totalRunTime += (System.currentTimeMillis() - startTime) / 1000.0;
 
@@ -67,7 +68,7 @@ public class SequentialClustering implements ClusteringService {
                 }
             }
         }
-        printTestResults(testsCycledCounter, totalRunTime);
+        printTestResults(testCyclesCounter, totalRunTime);
     }
 
     @Override
@@ -158,4 +159,24 @@ public class SequentialClustering implements ClusteringService {
         this.runTimeBlock = runTimeBlock;
     }
 
+    //these not in interface cuz they are only used once for distributed testing
+    public int getNumberOfClusters() {
+        return numberOfClusters;
+    }
+
+    public int getNumberOfSites() {
+        return numberOfSites;
+    }
+
+    public double getTotalRunTime() {
+        return totalRunTime;
+    }
+
+    public int getTestCyclesCounter() {
+        return testCyclesCounter;
+    }
+
+    public Map<Integer, TestResult> getResultMap() {
+        return resultMap;
+    }
 }

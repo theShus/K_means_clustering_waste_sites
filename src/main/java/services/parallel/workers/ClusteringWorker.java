@@ -1,4 +1,4 @@
-package services.parallelWorkers;
+package services.parallel.workers;
 
 import data.Centroid;
 import data.DataSet;
