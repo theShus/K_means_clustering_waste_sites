@@ -54,8 +54,7 @@ public class ParallelService implements ClusteringService {
         while (true) {
             startTime = System.currentTimeMillis();
 
-            //todo the entire testing process can be divided into 3 separate threads
-            TestResult testResult1 = calculateClusters(sites);
+            TestResult testResult1 = calculateClusters(sites);//the entire testing process can be divided into 3 separate threads as well
             TestResult testResult2 = calculateClusters(sites);
             TestResult testResult3 = calculateClusters(sites);
             TestResult avgResult = new TestResult(testResult1, testResult2, testResult3);
