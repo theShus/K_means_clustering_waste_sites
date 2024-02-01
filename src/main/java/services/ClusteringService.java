@@ -6,12 +6,12 @@ public interface ClusteringService {
 
     void runTesting();
 
-    TestResult calculateKMeans ();
+    TestResult calculateKMeans();
 
     void setNumberOfClustersAndSites(int numberOfClusters, int numberOfSites);
 
     void setTestingType(TestingType setTestingType);
 
-    void setRunTimeBlock (double runTimeBlock);
+    void setRunTimeBlock(double runTimeBlock);
 
 }

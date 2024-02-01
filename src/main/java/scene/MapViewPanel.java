@@ -6,12 +6,16 @@ import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.input.PanMouseInputListener;
 import org.jxmapviewer.input.ZoomMouseWheelListenerCenter;
-import org.jxmapviewer.viewer.*;
+import org.jxmapviewer.viewer.DefaultTileFactory;
+import org.jxmapviewer.viewer.GeoPosition;
+import org.jxmapviewer.viewer.Waypoint;
+import org.jxmapviewer.viewer.WaypointPainter;
+
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class MapViewPanel extends JPanel {
 
@@ -45,7 +49,7 @@ public class MapViewPanel extends JPanel {
         Map<Integer, Color> colorMap = generateUniqueColors(colorNumber);
         Set<Waypoint> waypoints = new LinkedHashSet<>();
 
-        for (Site site: sites) {
+        for (Site site : sites) {
             waypoints.add(new CustomWaypoint(new GeoPosition(site.getLatitude(), site.getLongitude()), colorMap.get(site.getClusterNo()), false));
         }
 

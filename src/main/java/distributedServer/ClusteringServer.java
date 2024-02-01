@@ -1,11 +1,8 @@
 package distributedServer;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ClusteringServer {
 
@@ -16,7 +13,7 @@ public class ClusteringServer {
         ServerSocket serverSocket = new ServerSocket(SERVER_PORT);
         System.out.println("Server is listening on port " + SERVER_PORT);
 
-        while(true){
+        while (true) {
             Socket socket = serverSocket.accept();
             Thread calculateThread = new Thread(new CalculateThread(socket));
             calculateThread.start();

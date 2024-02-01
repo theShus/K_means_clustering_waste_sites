@@ -4,8 +4,11 @@ import data.Centroid;
 import data.DataSet;
 import data.Site;
 import data.TestResult;
+
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SequentialService implements ClusteringService {
 
@@ -59,8 +62,7 @@ public class SequentialService implements ClusteringService {
             if (testingType == TestingType.LOCKED_CLUSTERS) {
                 this.numberOfSites += NUM_SITES_TO_INCREASE;// test demands we increase the num of sites by N every test cycle
                 sites = data.getNSites(this.numberOfSites);
-            }
-            else if (testingType == TestingType.LOCKET_SITES) {
+            } else if (testingType == TestingType.LOCKET_SITES) {
                 this.numberOfClusters += NUM_CLUSTERS_TO_INCREASE;// test demands we increase the num of sites by 500 every test cycle
                 if (numberOfClusters >= numberOfSites / 3) {
                     System.err.println("BREAK DUE TO EXCEEDING CLUSTER LIMIT");
@@ -116,7 +118,8 @@ public class SequentialService implements ClusteringService {
         }
 
         //counts how many sites in cluster
-        for (Site site : sites) clusterSizeCounter.put(site.getClusterNo(), clusterSizeCounter.get(site.getClusterNo()) + 1);
+        for (Site site : sites)
+            clusterSizeCounter.put(site.getClusterNo(), clusterSizeCounter.get(site.getClusterNo()) + 1);
         long totalTime = System.currentTimeMillis() - startTime;
         //return a result of testing (time is parsed so its not 10 decimals long)
         return new TestResult(cycleCounter, clusterSizeCounter, centroids, this.numberOfClusters, totalTime / 1000.0, sites);

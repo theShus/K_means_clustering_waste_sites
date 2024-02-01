@@ -10,7 +10,10 @@ import services.parallel.workers.CentroidRecomputeWorker;
 import services.parallel.workers.ClusteringWorker;
 
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 public class ParallelService implements ClusteringService {
@@ -70,8 +73,7 @@ public class ParallelService implements ClusteringService {
             if (testingType == TestingType.LOCKED_CLUSTERS) {
                 this.numberOfSites += NUM_SITES_TO_INCREASE;// test demands we increase the num of sites by N every test cycle
                 sites = data.getNSites(this.numberOfSites);
-            }
-            else if (testingType == TestingType.LOCKET_SITES) {
+            } else if (testingType == TestingType.LOCKET_SITES) {
                 this.numberOfClusters += NUM_CLUSTERS_TO_INCREASE;// test demands we increase the num of sites by 500 every test cycle
                 if (numberOfClusters >= numberOfSites / 3) {
                     System.err.println("BREAK DUE TO EXCEEDING CLUSTER LIMIT");
@@ -118,7 +120,8 @@ public class ParallelService implements ClusteringService {
         }
 
         //counts how many sites in cluster
-        for (Site site : sites) clusterSizeCounter.put(site.getClusterNo(), clusterSizeCounter.get(site.getClusterNo()) + 1);
+        for (Site site : sites)
+            clusterSizeCounter.put(site.getClusterNo(), clusterSizeCounter.get(site.getClusterNo()) + 1);
         long totalTime = System.currentTimeMillis() - startTime;
         //return a result of testing (time is parsed so its not 10 decimals long)
         return new TestResult(cycleCounter, clusterSizeCounter, centroids, this.numberOfClusters, totalTime / 1000.0, sites);
@@ -138,11 +141,11 @@ public class ParallelService implements ClusteringService {
         return retrieveCalculatedClusters(clusteringFutureResults);
     }
 
-    private List<Site> retrieveCalculatedClusters(List<Future<List<Site>>> futureResults){
+    private List<Site> retrieveCalculatedClusters(List<Future<List<Site>>> futureResults) {
         if (futureResults == null) return null;
         List<Site> clusteredSites = new ArrayList<>();
 
-        for (Future<List<Site>> futureSites: futureResults) {//go through all future results and get new list of clustered sites
+        for (Future<List<Site>> futureSites : futureResults) {//go through all future results and get new list of clustered sites
             try {
                 clusteredSites.addAll(futureSites.get());// .get() is blocking and will wait for the result, will not skip if it isn't finished
             } catch (InterruptedException | ExecutionException e) {
@@ -152,7 +155,7 @@ public class ParallelService implements ClusteringService {
         return clusteredSites;
     }
 
-    private List<Centroid> recomputeCentroidsThreaded(int numberOfClusters, List<Site> sites){
+    private List<Centroid> recomputeCentroidsThreaded(int numberOfClusters, List<Site> sites) {
         List<Future<Centroid>> centroidsFutureResults = new ArrayList<>();
         Map<Integer, List<Site>> sitesInCluster = new HashMap<>();
         for (int i = 0; i < numberOfClusters; i++) sitesInCluster.put(i, new ArrayList<>());
@@ -166,11 +169,11 @@ public class ParallelService implements ClusteringService {
         return retrieveCalculatedCentroids(centroidsFutureResults);
     }
 
-    private List<Centroid> retrieveCalculatedCentroids(List<Future<Centroid>> futureResults){
+    private List<Centroid> retrieveCalculatedCentroids(List<Future<Centroid>> futureResults) {
         if (futureResults == null) return null;
         List<Centroid> recomputedCentroids = new ArrayList<>();
 
-        for (Future<Centroid> centroidFuture: futureResults) {
+        for (Future<Centroid> centroidFuture : futureResults) {
             try {
                 recomputedCentroids.add(centroidFuture.get());// .get() is blocking and will wait for the result, will not skip if it isn't finished
             } catch (InterruptedException | ExecutionException e) {

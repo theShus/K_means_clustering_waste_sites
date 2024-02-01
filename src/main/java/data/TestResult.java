@@ -35,13 +35,12 @@ public class TestResult implements Serializable {
         //in case something breaks and list are not same size
         if (testResult1.clusterSizeCounter.size() != testResult2.clusterSizeCounter.size() && testResult2.clusterSizeCounter.size() != testResult3.clusterSizeCounter.size()) {
             this.clusterSizeCounter = null;
-        }
-        else this.clusterSizeCounter = calculateMapMean(testResult1.clusterSizeCounter, testResult2.clusterSizeCounter, testResult3.clusterSizeCounter);
+        } else
+            this.clusterSizeCounter = calculateMapMean(testResult1.clusterSizeCounter, testResult2.clusterSizeCounter, testResult3.clusterSizeCounter);
 
         if (testResult1.centroids.size() != testResult2.centroids.size() && testResult2.centroids.size() != testResult3.centroids.size()) {
             this.centroids = null;
-        }
-        else this.centroids = calculateListMean(testResult1.centroids, testResult2.centroids, testResult3.centroids);
+        } else this.centroids = calculateListMean(testResult1.centroids, testResult2.centroids, testResult3.centroids);
 
         this.clusterNo = (testResult1.clusterNo + testResult2.clusterNo + testResult3.clusterNo) / 3;
         this.runtime = Double.parseDouble(df.format((testResult1.runtime + testResult2.runtime + testResult3.runtime) / 3));
@@ -80,7 +79,7 @@ public class TestResult implements Serializable {
         System.out.println("Cycles: " + numberOfCycles + " | Clusters: " + clusterNo + " | Sites: " + sites.size() + " | Runtime: " + runtime);
 
         System.out.println("\n*** Cluster Data: ***");
-        for (Map.Entry<Integer, Integer> entry : clusterSizeCounter.entrySet()){
+        for (Map.Entry<Integer, Integer> entry : clusterSizeCounter.entrySet()) {
             System.out.println("Cluster " + entry.getKey() + ": " + entry.getValue() + " sites" + " || avg capacity: " + Double.parseDouble(df.format((clusterAvgCapacities.get(entry.getKey())))));
         }
 
@@ -90,7 +89,7 @@ public class TestResult implements Serializable {
             System.out.println("Centroid " + i + " : " + centroids.get(i));
     }
 
-    private  Map<Integer, Double> calculateAvgSiteCapacities(){
+    private Map<Integer, Double> calculateAvgSiteCapacities() {
         double avgCapacity;
         Map<Integer, Double> clusterAvgCapacities = new HashMap<>();
         for (int i = 0; i < sites.size(); i++) clusterAvgCapacities.put(i, 0.0);

@@ -1,11 +1,8 @@
 package services.distributed.dataPackages;
 
-import data.DataSet;
-import data.Site;
 import services.TestingType;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class DataPackage implements Serializable {
     private TestingType testingType;
